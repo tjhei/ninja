@@ -1256,7 +1256,16 @@ int ExceptionFilter(unsigned int code, struct _EXCEPTION_POINTERS *ep) {
 /// Returns an exit code, or -1 if Ninja should continue.
 int ReadFlags(int* argc, char*** argv,
               Options* options, BuildConfig* config) {
+
   config->parallelism = GuessParallelism();
+
+  char *s = getenv("NINJA_NUMJOBS");
+  if (s)
+    {
+      int value = atoi(s);
+      if (value >0)
+	config->parallelism = std::min(config->parallelism, value);
+    }
 
   enum { OPT_VERSION = 1 };
   const option kLongOptions[] = {
